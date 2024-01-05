@@ -30,17 +30,17 @@ class Memory:
 
 class MountainCarAgent:
     def __init__(self):
-        self.__env = gym.make("MountainCar-v0")
-        self.__device = torch.device("cuda")
-        self.__target_update = 1000
-        self.__batch_size = 128
-        self.__max_steps = 100001
-        self.__max_epsilon = 0.5
-        self.__min_epsilon = 0.1
-        self.__gamma = 0.99
-        self.__model = None
-        self.__target_model = None
-        self.__optimizer = None
+        self._env = gym.make("MountainCar-v0")
+        self._device = torch.device("cuda")
+        self._target_update = 1000
+        self._batch_size = 128
+        self._max_steps = 100001
+        self._max_epsilon = 0.5
+        self._min_epsilon = 0.1
+        self._gamma = 0.99
+        self._model = None
+        self._target_model = None
+        self._optimizer = None
 
     def get_model(self):
         return self.__model
@@ -49,7 +49,7 @@ class MountainCarAgent:
         self.__model.load_state_dict(torch.load(model_weights_path))
         self.__model.eval()
 
-    def create_new_model(self):
+    def create_new_model(self, learning_rate=0.00003):
         self.__model = nn.Sequential(
             nn.Linear(2, 32),
             nn.ReLU(),
@@ -60,7 +60,7 @@ class MountainCarAgent:
         self.__target_model = copy.deepcopy(self.__model)
         self.__model.to(self.__device)
         self.__target_model.to(self.__device)
-        self.__optimizer = optim.Adam(self.__model.parameters(), lr=0.00003)
+        self.__optimizer = optim.Adam(self.__model.parameters(), lr=learning_rate)
 
     def fit(self, reward, new_state, memory):
         batch = memory.sample(self.__batch_size)
@@ -129,10 +129,11 @@ class MountainCarAgent:
 
 
 if __name__ == "__main__":
-    site_packages_path = os.getenv('SITE_PACKAGES_PATH')
+    site_packages_path = os.getenv('SITE_PACKAGES_PATH', default=None)
     if site_packages_path is None:
-        raise EnvironmentError("SITE_PACKAGES_PATH environment variable is not set")
-    sys.path.append(site_packages_path)
+        print("Warning: SITE_PACKAGES_PATH environment variable is not set")  
+    else:
+        sys.path.append(site_packages_path)
     agent = MountainCarAgent()
     rewards = agent.train()
     agent.save()
