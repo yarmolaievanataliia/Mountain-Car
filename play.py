@@ -1,10 +1,17 @@
 import gym
+import argparse
 from train import MountainCarAgent
 
-if __name__ == "__main__":
-    agent = MountainCarAgent()
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='MountainCar Agent')
+    parser.add_argument('--model_path', type=str, default='your_model_weights.pth', help='Path to the model weights file')
+    return parser.parse_args()
 
-    agent.load('your_model_weights.pth')
+if __name__ == "__main__":
+    args = parse_arguments()
+
+    agent = MountainCarAgent()
+    agent.load(args.model_path)
 
     env = gym.make("MountainCar-v0")
     state = env.reset()
